@@ -1,13 +1,15 @@
 package com.inti.formation.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,13 @@ public class UserControllerTest {
 	 * constructors
 	 */
 	protected String uri;
+	
+
+	@InjectMocks
+	private UserController userControllerToMock;
+	
+	@Mock
+	private UserService userServiceToMock;
 
 	@Before
 	public void SetUp() {
@@ -65,16 +74,51 @@ public class UserControllerTest {
 		this.uri = "/user";
 	}
 	
+//	Method to be changed
+//	@Test
+//	public void getAllEntityList () {
+//		// Contient les résultats d'une requête HTTP
+//		MvcResult mvcResult;
+//		try {
+//			LOGGER.info("--------------------- Testing getAllEntity Method ----------------");
+//			
+//			LOGGER.info("--------------------- Constructing Utilisateur ----------------");
+//			LOGGER.info("--------------------- Saving Utilisateur ----------------");
+//			userService.addUser(new User(2, "dalii"));
+//			
+//			LOGGER.info("--------------------- Mocking Context WebService ----------------");
+//			mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri + "/all").accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+//			
+//			LOGGER.info("--------------------- Getting HTTP Status ----------------");
+//			int status = mvcResult.getResponse().getStatus();
+//			LOGGER.info("--------------------- Verifying HTTP Status ----------------");
+//			assertEquals(200, status);
+//			LOGGER.info("--------------------- Getting HTTP Status ----------------");
+//			String content = mvcResult.getResponse().getContentAsString();
+//			LOGGER.info("--------------------- Deserializing JSON Response ----------------");
+//			User[] userList = this.mapFromJson(content, User[].class);
+//			assertTrue(userList.length > 0);
+//			
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
+	
+// *********************************************************************************************************************
+//	 Correction - Check the status
 	@Test
-	public void getAllEntityList () {
-		// Contient les résultats d'une requête HTTP
+	public void getAllEntityList_StatusChecking () {
 		MvcResult mvcResult;
 		try {
 			LOGGER.info("--------------------- Testing getAllEntity Method ----------------");
 			
 			LOGGER.info("--------------------- Constructing Utilisateur ----------------");
-			LOGGER.info("--------------------- Saving Utilisateur ----------------");
-			userService.addUser(new User(2, "dalii"));
+			User user = new User(2, "dalii");
+			LOGGER.info("--------------------- Mocking the saving step of Utilisateur ----------------");
+			userServiceToMock = Mockito.mock(UserService.class);
+			Mockito.when(userServiceToMock.addUser(user)).thenReturn(user);
 			
 			LOGGER.info("--------------------- Mocking Context WebService ----------------");
 			mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri + "/all").accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
@@ -83,17 +127,33 @@ public class UserControllerTest {
 			int status = mvcResult.getResponse().getStatus();
 			LOGGER.info("--------------------- Verifying HTTP Status ----------------");
 			assertEquals(200, status);
-			LOGGER.info("--------------------- Getting HTTP Status ----------------");
-			String content = mvcResult.getResponse().getContentAsString();
-			LOGGER.info("--------------------- Deserializing JSON Response ----------------");
-			User[] userList = this.mapFromJson(content, User[].class);
-			assertTrue(userList.length > 0);
-			
+						
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	
+//	 Correction - Check if the method was invoked
+	@Test
+	public void getAllEntityList_CheckInvokedMethod () {
+		try {
+			LOGGER.info("--------------------- Testing getAllEntity Method ----------------");
+			
+			LOGGER.info("--------------------- Constructing Utilisateur ----------------");
+			User user = new User(2, "dalii");
+			LOGGER.info("--------------------- Mocking the saving of Utilisateur ----------------");
+			userControllerToMock.addNewUser(user);
+			LOGGER.info("--------------------- Verifying the invocation of the method ----------------");
+			Mockito.verify(userService).addUser(user);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+// *********************************************************************************************************************	
 	
 	@Test
 	public void createEntity() {
